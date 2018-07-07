@@ -1,5 +1,6 @@
 extern crate cmd_pattern;
-use cmd_pattern::stuff::*;
+use cmd_pattern::components::*;
+use cmd_pattern::commands::*;
 
 #[derive(Debug, Clone)]
 struct Point {
@@ -7,16 +8,9 @@ struct Point {
     y: i32,
 }
 
-impl Component for Point {
-}
-
 struct HP {
     val: i32,
 }
-impl Component for HP {
-
-}
-
 
 struct CommandMoveTo {
     x: i32,
@@ -31,21 +25,9 @@ impl Command for CommandMoveTo {
     }
 }
 
-struct CommandTakeDamage {
-    who: i32,
-    delta: i32,
-}
-impl Command for CommandTakeDamage {
-    type WriteData = i32;
-    fn apply(&self) {
-        println!("takeDam: {}", self.delta);
-    }
-}
-
 fn main() {
     let mut cmds = CommandCollection::new();
     cmds.add(Box::new(CommandMoveTo{x:3,y:9,who:0}));
-    cmds.add(Box::new(CommandTakeDamage{who:0,delta:13,}));
     cmds.process();
 
     let mut comp = ComponentCollection::new();
