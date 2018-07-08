@@ -36,14 +36,17 @@ pub mod components {
         }
 
         pub fn remove(&mut self, entity:i32, data: Box<Component>) {
-            let ent = self.comps.entry(entity);
+            match self.comps.get_mut(&entity) {
+                None => {},
+                Some(ent) => {
+                    let index = ent.iter().position( |i| {
+                        *i.getType() == data.getType()
+                    });
 
-            // make sure the component does not already exist
-            // for this entity
-            for d in ent.iter() {
-                if d.getType() == data.getType() {
-                    foundType = true;
-                    break;
+                    match index {
+                        None => {},
+                        Some(i) => { ent.remove(i); },
+                    }
                 }
             }
         }
