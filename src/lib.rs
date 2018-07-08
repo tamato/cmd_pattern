@@ -2,25 +2,50 @@
 #![allow(unused_variables)]
 #![allow(unused_mut)]
 
+
 pub mod components {
+    use std::collections::HashMap;
+
     pub trait Component {
-    }
-    impl<T> Component for T {
+        fn getType(&self) -> String;
     }
     pub struct ComponentCollection {
-        comps: Vec<Box<Component>>,
+        comps: HashMap<i32, Vec<Box<Component>>>,
     }
     impl ComponentCollection {
         pub fn new() -> Self {
-            Self { comps: Vec::new(), }
+            Self { comps: HashMap::new(), }
         }
         pub fn update(&self) {
-            for c in self.comps.iter() {
-                println!("asdf");
+        }
+        pub fn add(&mut self, entity:i32, data: Box<Component>) {
+            let ent = self.comps.entry(entity).or_insert(Vec::new());
+
+            // make sure the component does not already exist
+            // for this entity
+            let mut foundType = false;
+            for d in ent.iter() {
+                if d.getType() == data.getType() {
+                    foundType = true;
+                    break;
+                }
+            }
+            if foundType == false {
+                ent.push( data );
             }
         }
-        pub fn add(&mut self, data: Box<Component>) {
-            self.comps.push( data );
+
+        pub fn remove(&mut self, entity:i32, data: Box<Component>) {
+            let ent = self.comps.entry(entity);
+
+            // make sure the component does not already exist
+            // for this entity
+            for d in ent.iter() {
+                if d.getType() == data.getType() {
+                    foundType = true;
+                    break;
+                }
+            }
         }
     }
 }
