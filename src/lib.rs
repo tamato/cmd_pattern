@@ -57,6 +57,7 @@ pub mod commands {
     pub trait Command {
         type WriteData;
         fn apply(&self);
+        fn repeat(&self);
     }
 
     pub trait CommandBase {

@@ -22,22 +22,36 @@ impl Component for HP {
     }
 }
 
-struct CommandMoveTo {
-    x: i32,
-    y: i32,
-    who: i32,
+struct PoisonDamage {
+    val: i32,
 }
-
-impl Command for CommandMoveTo {
-    type WriteData = i32;
-    fn apply(&self) {
-        println!("moveto...{} {}", self.x, self.y);
+impl Component for PoisonDamage {
+    fn getType(&self) -> String {
+        String::from("PoisonDamage")
     }
 }
 
+struct CommandPoison {
+    who: i32,
+    val: i32,
+    // have a ticks to do full damage?
+    // should the poison damage be coming from the component?
+}
+ impl Command for CommandPoison {
+     type WriteData = i32;
+     fn apply(&self) {
+         println!("hitting {} with {} poison damage", self.who, self.val);
+     }
+    fn repeat(&self) {
+    }
+ }
+
 fn main() {
     let mut cmds = CommandCollection::new();
-    cmds.add(Box::new(CommandMoveTo{x:3,y:9,who:0}));
+    cmds.add(Box::new(CommandPoison{who:0, val:6}));
+    cmds.process();
+    cmds.process();
+    cmds.process();
     cmds.process();
 
     let mut comp = ComponentCollection::new();
