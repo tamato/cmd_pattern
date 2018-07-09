@@ -1,5 +1,5 @@
 extern crate cmd_pattern;
-use cmd_pattern::base::*;
+use cmd_pattern::*;
 
 #[derive(Debug, Clone)]
 struct Point {

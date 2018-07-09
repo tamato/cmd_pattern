@@ -3,6 +3,7 @@
 #![allow(unused_mut)]
 
 pub mod base;
+pub use base::*;
 
 #[cfg(test)]
 mod tests {
