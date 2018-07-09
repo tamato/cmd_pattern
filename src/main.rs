@@ -1,6 +1,5 @@
 extern crate cmd_pattern;
-use cmd_pattern::components::*;
-use cmd_pattern::commands::*;
+use cmd_pattern::base::*;
 
 #[derive(Debug, Clone)]
 struct Point {
@@ -8,7 +7,7 @@ struct Point {
     y: i32,
 }
 impl Component for Point {
-    fn getType(&self) -> String {
+    fn get_type(&self) -> String {
         String::from("Point")
     }
 }
@@ -17,7 +16,7 @@ struct HP {
     val: i32,
 }
 impl Component for HP {
-    fn getType(&self) -> String {
+    fn get_type(&self) -> String {
         String::from("HP")
     }
 }
@@ -26,7 +25,7 @@ struct PoisonDamage {
     val: i32,
 }
 impl Component for PoisonDamage {
-    fn getType(&self) -> String {
+    fn get_type(&self) -> String {
         String::from("PoisonDamage")
     }
 }
