@@ -1,5 +1,6 @@
 
 use std::collections::HashMap;
+use std::ops::{Index,IndexMut};
 
 pub trait Component {
     fn get_type(&self) -> String;
@@ -10,8 +11,6 @@ pub struct ComponentCollection {
 impl ComponentCollection {
     pub fn new() -> Self {
         Self { comps: HashMap::new(), }
-    }
-    pub fn update(&self) {
     }
     pub fn add(&mut self, entity:i32, data: Box<Component>) {
         let ent = self.comps.entry(entity).or_insert(Vec::new());
@@ -46,6 +45,20 @@ impl ComponentCollection {
         }
     }
 }
+
+impl Index<i32> for ComponentCollection {
+    type Output = Vec<Box<Component>>;
+    fn index(&self, index: i32) -> &Self::Output {
+        &self.comps[&index]
+    }
+}
+
+//impl IndexMut<i32> for ComponentCollection {
+//    fn index_mut(&mut self, index: i32) -> &mut Self::Output {
+//        let mut q:() = &mut self.comps[&index];
+//        q
+//    }
+//}
 
 pub trait Command {
     type WriteData;
