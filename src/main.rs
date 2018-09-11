@@ -45,25 +45,29 @@ impl Command for CommandPoison {
     type WriteData = i32;
     fn apply(&self) {
         println!("hitting {} with {} poison damage", self.who, self.val);
-        println!("Tells poisonManager/system who is poisoned"); 
-        // PoisonManager.add( self.who )
+        println!("Tells poisonSystem who is poisoned"); 
+        
+        // no global acess
+        // PoisonSystem.add( self.who );
     }
     fn repeat(&self) {
     }
 }
 
-struct PoisonManager {
+struct PoisonSystem {
     id_list: Vec<i32>,
 }
-impl PoisonManager {
+impl PoisonSystem {
     fn new() -> Self {
-        PoisonManager {
+        PoisonSystem {
             id_list: Vec::new(),
         }
     }
 
+    // Add target to be poisoned
     fn add(&mut self, who: i32) {
         let mut found = false;
+        // only add them once
         for c in self.id_list.iter() {
             if *c == who {
                 found = true;
@@ -74,7 +78,10 @@ impl PoisonManager {
             self.id_list.push(who);
         }
     }
+}
 
+impl System for PoisonSystem 
+{
     fn update(&mut self, comp_coll:&mut ComponentCollection) {
         for i in self.id_list.iter() {
             // as this runs, it should re-add anyone that is still poisoned.
@@ -88,7 +95,9 @@ impl PoisonManager {
             }
 
             match thing {
-                Some(thing) => println!("Thing: {}", thing.get_type()),
+                Some(thing) => {
+                    println!("Thing: {}", thing.get_type())
+                },
                 None => (),
             }
         }
@@ -109,9 +118,18 @@ fn main() {
     comp.add( 0, Box::new(HP(66)) );
     comp.add( 0, Box::new(PoisonComponent{dam:Vec::new()}) );
 
-    let mut pm = PoisonManager::new();
-    pm.add(0);
+    let mut pm = PoisonSystem::new();
     pm.update(&mut comp);
 }
 
+/***
+    order of operations
+    CommandCollection holds commands to be processed
+    ComponentCollection associates an ID to a list of components
+
+    PoisonSystem 
+        find the target to be poisoned
+        finds the poison compoent
+        applies poison
+**/
 

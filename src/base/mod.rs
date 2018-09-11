@@ -85,7 +85,7 @@ impl CommandCollection {
     pub fn new() -> Self {
         Self { cmds: Vec::new(), }
     }
-    pub fn process(&mut self) {
+    pub fn process(&mut self, systemCollection:&mut SystemBase) {
         for c in self.cmds.iter() {
             c.process();
         }
@@ -95,3 +95,16 @@ impl CommandCollection {
         self.cmds.push(cmd);
     }
 }
+
+pub trait System {
+    fn update(&mut self, comp_coll:&mut ComponentCollection);
+}
+
+pub trait SystemBase;
+impl<T> SystemBase for T
+where T: System
+{
+}
+
+
+
