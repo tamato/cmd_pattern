@@ -43,12 +43,12 @@ struct CommandPoison {
 }
 impl Command for CommandPoison {
     type WriteData = i32;
-    fn apply(&self) {
+    fn apply(&self, system_collection:&mut SystemCollection) {
         println!("hitting {} with {} poison damage", self.who, self.val);
         println!("Tells poisonSystem who is poisoned"); 
         
-        // no global acess
-        // PoisonSystem.add( self.who );
+        let a = &system_collection[0];
+        a.add(0);
     }
     fn repeat(&self) {
     }
@@ -57,32 +57,10 @@ impl Command for CommandPoison {
 struct PoisonSystem {
     id_list: Vec<i32>,
 }
-impl PoisonSystem {
-    fn new() -> Self {
-        PoisonSystem {
-            id_list: Vec::new(),
-        }
-    }
-
-    // Add target to be poisoned
-    fn add(&mut self, who: i32) {
-        let mut found = false;
-        // only add them once
-        for c in self.id_list.iter() {
-            if *c == who {
-                found = true;
-                break;
-            }
-        }
-        if false == found {
-            self.id_list.push(who);
-        }
-    }
-}
-
 impl System for PoisonSystem 
 {
-    fn update(&mut self, comp_coll:&mut ComponentCollection) {
+    type Data = i32;
+    fn update(&self, comp_coll:&mut ComponentCollection) {
         for i in self.id_list.iter() {
             // as this runs, it should re-add anyone that is still poisoned.
             let comps = &comp_coll[*i];
@@ -101,25 +79,40 @@ impl System for PoisonSystem
                 None => (),
             }
         }
-    
-        self.id_list.clear();
+    }
+
+    // Add target to be poisoned
+    fn add(&mut self, who: Self::Data) {
+        let mut found = false;
+        // only add them once
+        for c in self.id_list.iter() {
+            if *c == who {
+                found = true;
+                break;
+            }
+        }
+        if false == found {
+            self.id_list.push(who);
+        }
     }
 }
 
 fn main() {
-    let mut cmds = CommandCollection::new();
-    cmds.add(Box::new(CommandPoison{who:0, val:6}));
-    cmds.process();
-    cmds.process(); // process clears out previous commands
-                    // need a way to "re-add" any damage over time commands.
-
     let mut comp = ComponentCollection::new();
     comp.add( 0, Box::new(Point{x:9, y:9}) );
     comp.add( 0, Box::new(HP(66)) );
     comp.add( 0, Box::new(PoisonComponent{dam:Vec::new()}) );
 
-    let mut pm = PoisonSystem::new();
-    pm.update(&mut comp);
+    let mut sc = SystemCollection::new();
+    let pm = PoisonSystem{ id_list:Vec::new() };
+    sc.add(Box::new(pm));
+    sc.process_collection(&mut comp);
+
+    let mut cmds = CommandCollection::new();
+    cmds.add(Box::new(CommandPoison{who:0, val:6}));
+    cmds.process_collection(&mut sc);
+    cmds.process_collection(&mut sc);  // process clears out previous commands
+                            // need a way to "re-add" any damage over time commands.
 }
 
 /***

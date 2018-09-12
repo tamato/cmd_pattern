@@ -1,6 +1,6 @@
 
 use std::collections::HashMap;
-use std::ops::{Index,IndexMut};
+use std::ops::Index;
 
 pub trait Component {
     fn get_type(&self) -> String;
@@ -53,28 +53,21 @@ impl Index<i32> for ComponentCollection {
     }
 }
 
-//impl IndexMut<i32> for ComponentCollection {
-//    fn index_mut(&mut self, index: i32) -> &mut Self::Output {
-//        let mut q:() = &mut self.comps[&index];
-//        q
-//    }
-//}
-
 pub trait Command {
     type WriteData;
-    fn apply(&self);
+    fn apply(&self, system_collection:&mut SystemCollection);
     fn repeat(&self);
 }
 
 pub trait CommandBase {
-    fn process(&self);
+    fn process(&self, system_collection:&mut SystemCollection);
 }
 
 impl<T> CommandBase for T
 where T: Command
 {
-    fn process(&self) {
-        self.apply();
+    fn process(&self, system_collection:&mut SystemCollection) {
+        self.apply(system_collection);
     }
 }
 
@@ -85,9 +78,9 @@ impl CommandCollection {
     pub fn new() -> Self {
         Self { cmds: Vec::new(), }
     }
-    pub fn process(&mut self, systemCollection:&mut SystemBase) {
+    pub fn process_collection(&mut self, system_collection:&mut SystemCollection) {
         for c in self.cmds.iter() {
-            c.process();
+            c.process(system_collection);
         }
         self.cmds.clear();
     }
@@ -97,13 +90,44 @@ impl CommandCollection {
 }
 
 pub trait System {
-    fn update(&mut self, comp_coll:&mut ComponentCollection);
+    type Data;
+    fn update(&self, comp_coll:&mut ComponentCollection);
+    fn add(&mut self, data: Self::Data);
 }
-
-pub trait SystemBase;
+pub trait SystemBase
+{
+    fn process(&self, comp_coll:&mut ComponentCollection); 
+}
 impl<T> SystemBase for T
 where T: System
 {
+    fn process(&self, comp_coll:&mut ComponentCollection) {
+        self.update(comp_coll);
+    }
+}
+
+pub struct SystemCollection {
+    systems: Vec<Box<dyn SystemBase>>,
+}
+impl SystemCollection {
+    pub fn new() -> Self {
+        SystemCollection { systems:Vec::new() }
+    }
+    pub fn add(&mut self, system: Box<dyn SystemBase>) {
+        self.systems.push(system);
+    }
+    pub fn process_collection(&self, comp_coll:&mut ComponentCollection) {
+        for sys in self.systems.iter() {
+            sys.process(comp_coll);
+        }
+    }
+}
+
+impl Index<i32> for SystemCollection {
+    type Output = Box<SystemBase>;
+    fn index(&self, index: i32) -> &Self::Output {
+        &self.systems[index as usize]
+    }
 }
 
 
